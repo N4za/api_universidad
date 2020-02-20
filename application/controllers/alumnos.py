@@ -62,7 +62,7 @@ class Alumnos:
             return result  # Regresa el diccionario generado
         except Exception as e:
             result = {}  # crear diccionario vacio
-            print("Error {}".format(e.args()))
+            print("Error {}".format(e.args))
             result['app_version'] = app_version  # version de la webapp
             result['status'] = "Error "  # mensaje de status
             return result  # Regresa el diccionario generado
