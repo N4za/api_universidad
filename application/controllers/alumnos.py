@@ -66,6 +66,7 @@ class Alumnos:
             result['app_version'] = app_version  # version de la webapp
             result['status'] = "Error "  # mensaje de status
             return result  # Regresa el diccionario generado
+
 ##SEARCH 
     def GET(self):
         try:
@@ -117,3 +118,25 @@ class Alumnos:
             result['app_version'] = app_version  # version de la webapp
             result['status'] = "Error "  # mensaje de status
             return result  # Regresa el diccionario generado
+#BUSQUEDA 
+    @staticmethod
+    def actionSearch(app_version, file, matricula):
+        try:
+            result = {}  # crear diccionario vacio
+            result['app_version'] = app_version  # version de la webapp
+            result['status'] = "200 ok"  # mensaje de status
+
+            with open(file, 'r') as csvfile:  # abre el archivo en modo lectura
+                reader = csv.DictReader(csvfile)  # toma la 1er fila para los nombres
+                alumnos = []  # array para almacenar todos los alumnos
+                for row in reader: 
+                    if (row['matricula'] == matricula):
+                        result['alumnos'] = row
+            return result
+
+        except Exception as e: 
+            result = {}
+            print("Error {}".format(e.args))
+            result['app_version'] - app_version
+            result['status'] = "Error"
+            return result
