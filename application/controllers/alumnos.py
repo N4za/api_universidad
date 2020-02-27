@@ -5,41 +5,58 @@ import json  # json parser
 '''
     Controller Alumnos que es invocado cuando el usuario ingrese a la
     URL: http://localhost:8080/alumnos?action=get&token=1234
+
+    Control de Busqueda por matricula que es invocado cuando el usuario ingresa a la 
+    URL: http://localhost:8080/alumnos?action=search&token=1234&matricula=17161511
 '''
-
-
 class Alumnos:
+    app_version = "0.4.0"
+    file = 'static/csv/alumnos.csv'
+    def __init__(self):
+        pass  
 
-    app_version = "0.03"  # version de la webapp
-    file = 'static/csv/alumnos.csv'  # define el archivo donde se almacenan los datos
-
-    def __init__(self):  # Método inicial o constructor de la clase
-        pass  # Simplemente continua con la ejecución
-
+#GET
     def GET(self):
         try:
-            data = web.input()  # recibe los datos por la url
-            if data['token'] == "1234":  # valida el token que se recibe por url
-                if data['action'] == 'get':  # evalua la acción a realizar
-                    result = self.actionGet(self.app_version, self.file)  # llama al metodo actionGet(), y almacena el resultado
-                    return json.dumps(result)  # Parsea el diccionario result a formato json
-                else:
-                    result = {}  # crear diccionario vacio
-                    result['app_version'] = self.app_version  # version de la webapp
-                    result['status'] = "Command not found"
-                    return json.dumps(result)  # Parsea el diccionario result a formato json
-            else:
-                result = {}  # crear diccionario vacio
-                result['app_version'] = self.app_version  # version de la webapp
-                result['status'] = "Invalid Token"
-                return json.dumps(result)  # Parsea el diccionario result a formato json
-        except Exception as e:
-            print("Error" + str(e.args()))
-            result = {}  # crear diccionario vacio
-            result['app_version'] = self.app_version  # version de la webapp
-            result['status'] = "Values missing, sintaxis: alumnos?action=get&token=XXXX"
-            return json.dumps(result)  # Parsea el diccionario result a formato json
-
+            data = web.input()
+            if data['token'] == "1234": 
+                if data['action'] == 'get': 
+                    result = self.actionGet(self.app_version, self.file) 
+                    return json.dumps(result) 
+                elif data['action'] == 'search':
+                    matricula = data['matricula']
+                    result = self.actionSearch(self.app_version, self.file, matricula)
+                    return json.dumps(result)
+                elif data['action'] == 'put':
+                    matricula = int(data['matricula'])
+                    nombre = str(data['nombre'])
+                    primer_apellido = str(data['primer_apellido'])
+                    segundo_apellido = str(data['segundo_apellido'])
+                    carrera = str(data['carrera'])
+                    alumno=[]
+                    alumno.append(matricula)
+                    alumno.append(nombre)
+                    alumno.append(primer_apellido)
+                    alumno.append(segundo_apellido)
+                    alumno.append(carrera)
+                    result = self.actionPut(self.app_version, self.file, alumno)
+                    return json.dumps(result)
+                elif data['action'] == 'delete':
+                    matricula = data['matricula']
+                    result = self.actionDelete(self.app_version, self.file, matricula)
+                    return json.dumps(resul)
+                elif data['action'] == 'update':
+                    result = self.actionUpdate(self.app_version, self.file)
+                    return json.dumps(result)
+                elif data['action'] == 'help':
+                    result = {}
+                    result['app_version'] = self.app_version
+                    result['status'] = "200 ok"
+                    result['get'] = "?action=search&token=XXXX&matricula=XXXX"
+                    result['put'] = "?action=search&token=XXXX&matricula=XXXX&nombre=nombre&primer_apellido=apellido&segundo_apellido=apellido2&carrera=namecarrera"
+                    result['delete'] = "?action=search&token=XXXX&matricula=XXXX"
+                    result['update'] = "?action=search&token=XXXX&matricula=XXXX"
+                    return json.dumps(result)
                 else:
                     result = {} 
                     result['app_version'] = self.app_version 
@@ -51,109 +68,148 @@ class Alumnos:
                 result['status'] = "Invalid Token"
                 return json.dumps(result) 
         except Exception as e:
-            print("Error" + str(e.args()))
+            print("Error")
             result = {} 
             result['app_version'] = self.app_version 
             result['status'] = "Values missing, sintaxis: alumnos?action=get&token=XXXX"
-            return json.dumps(result)
+            return json.dumps(result) 
 #GET
     @staticmethod
     def actionGet(app_version, file):
         try:
-            result = {}  # crear diccionario vacio
-            result['app_version'] = app_version  # version de la webapp
-            result['status'] = "200 ok"  # mensaje de status
+            result = {} 
+            result['app_version'] = app_version 
+            result['status'] = "200 ok" 
 
-            with open(file, 'r') as csvfile:  # abre el archivo en modo lectura
-                reader = csv.DictReader(csvfile)  # toma la 1er fila para los nombres
-                alumnos = []  # array para almacenar todos los alumnos
-                for row in reader:  # recorre el archivo CSV fila por fila
-                    fila = {}  # Genera un diccionario por cada registro en el csv
-                    fila['matricula'] = row['matricula']  # obtiene la matricula y la agrega al diccionario
-                    fila['nombre'] = row['nombre']  # optione el nombre y lo agrega al diccionario
-                    fila['primer_apellido'] = row['primer_apellido']  # optiene el primer_apellido
-                    fila['segundo_apellido'] = row['segundo_apellido']  # optiene el segundo apellido
-                    fila['carrera'] = row['carrera']  # obtiene la carrera
-                    alumnos.append(fila)  # agrega el diccionario generado al array alumnos
-                result['alumnos'] = alumnos  # agrega el array alumnos al diccionario result
-            return result  # Regresa el diccionario generado
+            with open(file, 'r') as csvfile: 
+                reader = csv.DictReader(csvfile) 
+                alumnos = [] 
+                for row in reader: 
+                    fila = {} 
+                    fila['matricula'] = row['matricula']
+                    fila['nombre'] = row['nombre'] 
+                    fila['primer_apellido'] = row['primer_apellido'] 
+                    fila['segundo_apellido'] = row['segundo_apellido'] 
+                    fila['carrera'] = row['carrera'] 
+                    alumnos.append(fila) 
+                result['alumnos'] = alumnos 
+            return result 
         except Exception as e:
-            result = {}  # crear diccionario vacio
+            result = {} 
             print("Error {}".format(e.args))
-            result['app_version'] = app_version  # version de la webapp
-            result['status'] = "Error "  # mensaje de status
-            return result  # Regresa el diccionario generado
-
-##SEARCH 
-    def GET(self):
-        try:
-            data = web.input()  # recibe los datos por la url
-            if data['token'] == "1234":  # valida el token que se recibe por url
-                if data['action'] == 'get':  # evalua la acción a realizar
-                    result = self.actionGet(self.app_version, self.file)  # llama al metodo actionGet(), y almacena el resultado
-                    return json.dumps(result)  # Parsea el diccionario result a formato json
-                else:
-                    result = {}  # crear diccionario vacio
-                    result['app_version'] = self.app_version  # version de la webapp
-                    result['status'] = "Command not found"
-                    return json.dumps(result)  # Parsea el diccionario result a formato json
-            else:
-                result = {}  # crear diccionario vacio
-                result['app_version'] = self.app_version  # version de la webapp
-                result['status'] = "Invalid Token"
-                return json.dumps(result)  # Parsea el diccionario result a formato json
-        except Exception as e:
-            print("Error" + str(e.args()))
-            result = {}  # crear diccionario vacio
-            result['app_version'] = self.app_version  # version de la webapp
-            result['status'] = "Values missing, sintaxis: alumnos?action=get&token=XXXX"
-            return json.dumps(result)  # Parsea el diccionario result a formato json
-
-    @staticmethod
-    def actionGet(app_version, file):
-        try:
-            result = {}  # crear diccionario vacio
-            result['app_version'] = app_version  # version de la webapp
-            result['status'] = "200 ok"  # mensaje de status
-
-            with open(file, 'r') as csvfile:  # abre el archivo en modo lectura
-                reader = csv.DictReader(csvfile)  # toma la 1er fila para los nombres
-                alumnos = []  # array para almacenar todos los alumnos
-                for row in reader:  # recorre el archivo CSV fila por fila
-                    fila = {}  # Genera un diccionario por cada registro en el csv
-                    fila['matricula'] = row['matricula']  # obtiene la matricula y la agrega al diccionario
-                    fila['nombre'] = row['nombre']  # optione el nombre y lo agrega al diccionario
-                    fila['primer_apellido'] = row['primer_apellido']  # optiene el primer_apellido
-                    fila['segundo_apellido'] = row['segundo_apellido']  # optiene el segundo apellido
-                    fila['carrera'] = row['carrera']  # obtiene la carrera
-                    alumnos.append(fila)  # agrega el diccionario generado al array alumnos
-                result['alumnos'] = alumnos  # agrega el array alumnos al diccionario result
-            return result  # Regresa el diccionario generado
-        except Exception as e:
-            result = {}  # crear diccionario vacio
-            print("Error {}".format(e.args))
-            result['app_version'] = app_version  # version de la webapp
-            result['status'] = "Error "  # mensaje de status
-            return result  # Regresa el diccionario generado
-#BUSQUEDA 
+            result['app_version'] = app_version 
+            result['status'] = "Error " 
+            return result 
+#SEARCH BUSQUEDA
     @staticmethod
     def actionSearch(app_version, file, matricula):
         try:
-            result = {}  # crear diccionario vacio
-            result['app_version'] = app_version  # version de la webapp
-            result['status'] = "200 ok"  # mensaje de status
+            result = {} 
+            result['app_version'] = app_version 
+            result['status'] = "200 ok" 
 
-            with open(file, 'r') as csvfile:  # abre el archivo en modo lectura
-                reader = csv.DictReader(csvfile)  # toma la 1er fila para los nombres
-                alumnos = []  # array para almacenar todos los alumnos
+            with open(file, 'r') as csvfile: 
+                reader = csv.DictReader(csvfile) 
+                alumnos = [] 
                 for row in reader: 
-                    if (row['matricula'] == matricula):
-                        result['alumnos'] = row
+                    if row['matricula'] == matricula:
+                        fila = {}
+                        fila['matricula'] = row['matricula']
+                        fila['nombre'] = row['nombre']
+                        fila['primer_apellido'] = row['primer_apellido']
+                        fila['segundo_apellido'] = row['segundo_apellido']
+                        fila['carrera'] = row['carrera']
+                        alumnos.append(fila)
+                result['alumnos'] = alumnos
+            return result 
+        except Exception as e:
+            result = {} 
+            print("Error {}".format(e.args))
+            result['app_version'] = app_version 
+            result['status'] = "Error " 
             return result
+#PUT
+    @staticmethod
+    def actionPut(app_version, file, alumno):
+        try:
+            result = {} 
+            result['app_version'] = app_version 
+            result['status'] = "200 ok" 
 
-        except Exception as e: 
+            with open(file, 'a+', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(alumno)
+            with open(file, 'r') as csvfile:
+                reader = csv.DictReader(csvfile)
+                alumno = []
+                for row in reader:
+                    fila = {}
+                    fila['matricula'] = row['matricula']
+                    fila['nombre'] = row['nombre']
+                    fila['primer_apellido'] = row['primer_apellido']
+                    fila['segundo_apellido'] = row['segundo_apellido']
+                    fila['carrera'] = row['carrera']
+                    alumnos.append(fila)
+                result['alumnos'] = alumnos
+            return result
+        except Exception as e:
             result = {}
             print("Error {}".format(e.args))
-            result['app_version'] - app_version
+            result['app_version'] = app_version
+            result['status'] = "Error"
+            return result
+##DELETE
+    @staticmethod
+    def actionDelete(app_version, file, matricula):
+        try:
+            result = {} 
+            result['app_version'] = app_version 
+            result['status'] = "200 ok" 
+            with open(file, 'r') as csvfile:
+                reader = csv.DictReader(csvfile)
+                alumno = []
+                for row in reader:
+                    fila = {}
+                    fila['matricula'] = row['matricula']
+                    fila['nombre'] = row['nombre']
+                    fila['primer_apellido'] = row['primer_apellido']
+                    fila['segundo_apellido'] = row['segundo_apellido']
+                    fila['carrera'] = row['carrera']
+                    alumnos.append(fila)
+                    for i in range(len(alumnos)):
+                        if alumnos[i]['matricula'] == matricula:
+                            del alumnos[i]
+                result['alumnos'] = alumnos
+            return result
+        except Exception as e:
+            result = {}
+            print("Error {}".format(e.args))
+            result['app_version'] = app_version
+            result['status'] = "Error"
+            return result
+#UPDATE
+    @staticmethod
+    def actionUpdate(app_version, file):
+        try:
+            result = {} 
+            result['app_version'] = app_version 
+            result['status'] = "200 ok" 
+            with open(file, 'r') as csvfile:
+                reader = csv.DictReader(csvfile)
+                alumno = []
+                for row in reader:
+                    fila = {}
+                    fila['matricula'] = row['matricula']
+                    fila['nombre'] = row['nombre']
+                    fila['primer_apellido'] = row['primer_apellido']
+                    fila['segundo_apellido'] = row['segundo_apellido']
+                    fila['carrera'] = row['carrera']
+                    alumnos.append(fila)
+                result['alumnos'] = alumnos
+            return result
+        except Exception as e:
+            result = {}
+            print("Error {}".format(e.args))
+            result['app_version'] = app_version
             result['status'] = "Error"
             return result
