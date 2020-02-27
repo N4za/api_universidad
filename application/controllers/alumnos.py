@@ -40,6 +40,23 @@ class Alumnos:
             result['status'] = "Values missing, sintaxis: alumnos?action=get&token=XXXX"
             return json.dumps(result)  # Parsea el diccionario result a formato json
 
+                else:
+                    result = {} 
+                    result['app_version'] = self.app_version 
+                    result['status'] = "Command not found"
+                    return json.dumps(result) 
+            else:
+                result = {} 
+                result['app_version'] = self.app_version 
+                result['status'] = "Invalid Token"
+                return json.dumps(result) 
+        except Exception as e:
+            print("Error" + str(e.args()))
+            result = {} 
+            result['app_version'] = self.app_version 
+            result['status'] = "Values missing, sintaxis: alumnos?action=get&token=XXXX"
+            return json.dumps(result)
+#GET
     @staticmethod
     def actionGet(app_version, file):
         try:
