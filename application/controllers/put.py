@@ -7,7 +7,7 @@ import json
 class Put:
     file = "/static/csv/alumnos.csv"
 
-    def __init__(self):
+    def __init__(self):se
         pass
 
     def GET(self):
